@@ -21,4 +21,5 @@ When you first run the script, it automatically adds a daily update check to Tas
 ### Installing Winget (Optional)
 ```bash
 Add-AppxPackage -Path "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+Add-AppxPackage -Path "https://aka.ms/winget-cli"
 ```
