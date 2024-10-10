@@ -1,4 +1,4 @@
-# Admin hakları kontrolü
+# Admin rights check
 function Test-Admin {
     $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
     $adminRole = [Security.Principal.WindowsBuiltinRole]::Administrator
@@ -7,52 +7,60 @@ function Test-Admin {
     return $principal.IsInRole($adminRole)
 }
 
-# Eğer admin hakları yoksa, scripti yeniden admin olarak çalıştır
+# If admin rights are not present, restart the script as admin
 if (-not (Test-Admin)) {
-    Write-Host "Bu betik yönetici hakları gerektiriyor. Tekrar yönetici olarak çalıştırılıyor..."
+    Write-Host "This script requires administrator rights. Restarting as administrator..."
     Start-Process powershell -ArgumentList "-File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
 
-# Chromium güncelleme betiği
+# Chromium update script
 $scriptContent = @'
-# Kurulum ve güncelleme kontrolü için package ID
+# Package ID for installation and update check
 $packageId = "Hibbiki.Chromium"
 
-# Kurulu olup olmadığını kontrol et
+# Check if it is installed
 $installedPackage = winget list --id $packageId
 
 if ($installedPackage -like "*No installed package found*") {
-    # Kurulu değilse yükle
-    Write-Host "Chromium yüklü değil, kuruluyor..."
+    # If not installed, install it
+    Write-Host "Chromium is not installed, installing..."
     winget install --id $packageId --silent
-    Write-Host "Chromium başarıyla yüklendi."
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Chromium has been successfully installed."
+    } else {
+        Write-Host "An error occurred while installing Chromium."
+    }
 } else {
-    # Kuruluysa güncelleme kontrolü yap
-    Write-Host "Chromium yüklü, güncellemeler kontrol ediliyor..."
+    # If installed, check for updates
+    Write-Host "Chromium is installed, checking for updates..."
     $updateAvailable = winget upgrade --id $packageId
     
     if ($updateAvailable -like "*No applicable update found*") {
-        Write-Host "Chromium güncel, herhangi bir güncelleme bulunamadı."
+        Write-Host "Chromium is up to date, no updates found."
     } else {
-        Write-Host "Chromium için güncelleme bulundu, güncellemeyi yüklüyorum..."
+        Write-Host "Update found for Chromium, installing the update..."
         winget upgrade --id $packageId --silent
-        Write-Host "Güncelleme başarıyla yüklendi."
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Update has been successfully installed."
+        } else {
+            Write-Host "An error occurred while installing the update."
+        }
     }
 }
 '@
 
-# Betiği C:/chromium.ps1 dosyasına kaydet
+# Save the script to C:/chromium.ps1
 $scriptPath = "C:/chromium.ps1"
 Set-Content -Path $scriptPath -Value $scriptContent -Force
-Write-Host "Betiğin içeriği $scriptPath konumuna başarıyla kaydedildi."
+Write-Host "The script content has been successfully saved to $scriptPath."
 
-# Görev Zamanlayıcı'ya günlük görev eklemek
-$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File $scriptPath"
-$trigger = New-ScheduledTaskTrigger -Daily -At 12pm  # Her gün öğlen 12:00'de çalışması için
+# Adding a daily task to Task Scheduler
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File C:/chromium.ps1"
+$trigger = New-ScheduledTaskTrigger -Daily -At 12pm  # To run every day at 12:00 PM
 $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
-# Yeni görev zamanlayıcı ekleniyor
-Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -Settings $settings -TaskName "Chromium Güncelleme Kontrolü"
-Write-Host "Chromium güncelleme kontrolü için günlük görev başarıyla eklendi."
+# Adding the new scheduled task
+Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -Settings $settings -TaskName "Chromium Update Check"
+Write-Host "Daily task for Chromium update check has been successfully added."

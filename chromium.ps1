@@ -1,24 +1,32 @@
-# Kurulum ve güncelleme kontrolü için package ID
+# Package ID for installation and update check
 $packageId = "Hibbiki.Chromium"
 
-# Kurulu olup olmadığını kontrol et
+# Check if it is installed
 $installedPackage = winget list --id $packageId
 
 if ($installedPackage -like "*No installed package found*") {
-    # Kurulu değilse yükle
-    Write-Host "Chromium yüklü değil, kuruluyor..."
+    # If not installed, install it
+    Write-Host "Chromium is not installed, installing..."
     winget install --id $packageId --silent
-    Write-Host "Chromium başarıyla yüklendi."
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Chromium has been successfully installed."
+    } else {
+        Write-Host "An error occurred while installing Chromium."
+    }
 } else {
-    # Kuruluysa güncelleme kontrolü yap
-    Write-Host "Chromium yüklü, güncellemeler kontrol ediliyor..."
+    # If installed, check for updates
+    Write-Host "Chromium is installed, checking for updates..."
     $updateAvailable = winget upgrade --id $packageId
     
     if ($updateAvailable -like "*No applicable update found*") {
-        Write-Host "Chromium güncel, herhangi bir güncelleme bulunamadı."
+        Write-Host "Chromium is up to date, no updates found."
     } else {
-        Write-Host "Chromium için güncelleme bulundu, güncellemeyi yüklüyorum..."
+        Write-Host "Update found for Chromium, installing the update..."
         winget upgrade --id $packageId --silent
-        Write-Host "Güncelleme başarıyla yüklendi."
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Update has been successfully installed."
+        } else {
+            Write-Host "An error occurred while installing the update."
+        }
     }
 }
