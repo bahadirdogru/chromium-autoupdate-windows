@@ -1,0 +1,21 @@
+Windows Registry Editor Version 5.00
+
+; Extend Extension Manifest v2 availability registry
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\BraveSoftware\Brave]
+"ExtensionManifestV2Availability"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Chromium]
+"ExtensionManifestV2Availability"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Google\Chrome]
+"ExtensionManifestV2Availability"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Microsoft\Edge]
+"ExtensionManifestV2Availability"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Vivaldi]
+"ExtensionManifestV2Availability"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\YandexBrowser]
+"ExtensionManifestV2Availability"=dword:00000002
